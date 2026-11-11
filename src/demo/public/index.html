@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calcbench Live</title>
+<style>
+/* ============================================================
+   LOOK — every visual decision lives here. A redesign should only
+   need to change this block (tokens first, then component styles).
+   ============================================================ */
+:root {
+  --bg: #0e0f13;
+  --surface: #16181e;
+  --surface-2: #1d2028;
+  --border: #2a2e38;
+  --text: #eceef3;
+  --text-dim: #8a90a0;
+  --accent: #e8875b;          /* Claude */
+  --accent-soft: rgba(232, 135, 91, 0.16);
+  --you: #7aa2f7;             /* page / you */
+  --you-soft: rgba(122, 162, 247, 0.14);
+  --ok: #4ec98a;
+  --bad: #f06a6a;
+  --key: #23262f;
+  --key-hover: #2b2f3a;
+  --key-op: #2e3240;
+  --radius: 14px;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f4f5f8; --surface: #ffffff; --surface-2: #f0f2f6; --border: #dde1e8;
+    --text: #15171c; --text-dim: #646b7a; --key: #eef0f4; --key-hover: #e3e6ec; --key-op: #e2e6ef;
+    --accent-soft: rgba(212, 110, 64, 0.14); --accent: #d46e40; --you: #3d6fd6; --you-soft: rgba(61,111,214,.12);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f4f5f8; --surface: #ffffff; --surface-2: #f0f2f6; --border: #dde1e8;
+  --text: #15171c; --text-dim: #646b7a; --key: #eef0f4; --key-hover: #e3e6ec; --key-op: #e2e6ef;
+  --accent-soft: rgba(212, 110, 64, 0.14); --accent: #d46e40; --you: #3d6fd6; --you-soft: rgba(61,111,214,.12);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--font);
+  min-height: 100vh; padding: 24px 16px;
+}
+.app { max-width: 1080px; margin: 0 auto; }
+
+header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+.brand { font-weight: 700; letter-spacing: -0.02em; font-size: 20px; }
+.brand span { color: var(--accent); }
+.status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: pulse 2s infinite; }
+.status.off .dot { background: var(--bad); animation: none; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(78,201,138,.5); } 70% { box-shadow: 0 0 0 8px rgba(78,201,138,0); } 100% { box-shadow: 0 0 0 0 rgba(78,201,138,0); } }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+
+.display { background: var(--surface-2); border-radius: 12px; padding: 18px 20px; text-align: right; margin-bottom: 14px; min-height: 108px; }
+.display .value { font-family: var(--mono); font-size: clamp(36px, 7vw, 56px); font-weight: 600; letter-spacing: -0.02em; overflow-wrap: anywhere; line-height: 1.1; }
+.display .expr { font-family: var(--mono); font-size: 13px; color: var(--text-dim); min-height: 18px; margin-top: 4px; }
+
+.regs { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 16px; }
+.reg { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; border: 1px solid transparent; transition: border-color .3s, background .3s; }
+.reg .num { font-family: var(--mono); font-size: 24px; font-weight: 600; margin-top: 4px; }
+.tape-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; min-height: 30px; align-items: center; }
+.chip { font-family: var(--mono); font-size: 14px; background: var(--key); padding: 4px 9px; border-radius: 8px; animation: pop .35s cubic-bezier(.2,1.6,.4,1); }
+.tape-sum { font-family: var(--mono); font-size: 13px; color: var(--text-dim); margin-left: auto; }
+.empty { color: var(--text-dim); font-size: 13px; }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.flash-claude { border-color: var(--accent) !important; background: var(--accent-soft) !important; }
+.flash-you { border-color: var(--you) !important; background: var(--you-soft) !important; }
+.bump { animation: bump .45s ease-out; display: inline-block; }
+@keyframes bump { from { transform: translateY(8px); opacity: .2; } to { transform: none; opacity: 1; } }
+
+.keys { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.keys button {
+  font: 600 18px var(--font); color: var(--text); background: var(--key); border: 0; border-radius: 11px;
+  padding: 15px 0; cursor: pointer; transition: background .12s, transform .06s;
+}
+.keys button:hover { background: var(--key-hover); }
+.keys button:active { transform: scale(.95); }
+.keys .op { background: var(--key-op); color: var(--you); }
+.keys .fn { font-size: 14px; background: var(--key-op); }
+.keys .ny0t { color: var(--accent); }
+.keys .eq { background: var(--you); color: #fff; }
+.keys .wide { grid-column: span 2; }
+
+.side { display: flex; flex-direction: column; min-height: 0; }
+.side-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+.btn-ghost { font: 500 13px var(--font); color: var(--text-dim); background: none; border: 1px solid var(--border); border-radius: 9px; padding: 6px 11px; cursor: pointer; }
+.btn-ghost:hover { color: var(--text); }
+.btn-claude { color: var(--accent); border-color: var(--accent); }
+.feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: 520px; }
+.feed li {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: baseline;
+  background: var(--surface-2); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--you);
+  animation: slide .35s ease-out;
+}
+.feed li.claude { border-left-color: var(--accent); }
+.feed .who { font-size: 12px; font-weight: 600; color: var(--you); white-space: nowrap; }
+.feed li.claude .who { color: var(--accent); }
+.feed .call { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+.feed .time { font-size: 11px; color: var(--text-dim); }
+.feed .res { grid-column: 2 / 4; font-family: var(--mono); font-size: 13px; color: var(--text-dim); }
+.feed .res b { color: var(--text); font-weight: 600; }
+.feed li.err .res b { color: var(--bad); }
+.feed-empty { color: var(--text-dim); font-size: 14px; padding: 24px 4px; text-align: center; }
+@keyframes slide { from { transform: translateY(-10px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.mockbar { margin-top: 16px; font-size: 12px; color: var(--text-dim); text-align: center; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">calc<span>bench</span> live</div>
+    <div class="status" id="status"><span class="dot"></span><span id="status-text">live</span></div>
+  </header>
+
+  <div class="grid">
+    <section class="card" aria-label="Calculator">
+      <div class="display">
+        <div class="value" id="display">0</div>
+        <div class="expr" id="expr"></div>
+      </div>
+      <div class="regs">
+        <div class="reg" id="mem-box"><div class="label">Memory</div><div class="num"><span id="mem">0</span></div></div>
+        <div class="reg" id="tape-box"><div class="label">Tape</div><div class="tape-items" id="tape"></div></div>
+      </div>
+      <div class="keys" id="keys">
+        <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-op="divide">÷</button><button class="fn" data-t="mem_add">M+</button>
+        <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-op="multiply">×</button><button class="fn" data-t="mem_read">MR</button>
+        <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-op="subtract">−</button><button class="fn" data-t="mem_clear">MC</button>
+        <button data-k="0">0</button><button data-k=".">.</button><button data-k="±">±</button><button class="op" data-op="add">+</button><button class="fn" data-t="tape_push">T+</button>
+        <button class="fn ny0t" data-op="ny0tadd">ny0t+</button><button class="fn" data-k="C">C</button><button class="eq wide" data-k="=">=</button><button class="fn" data-t="tape_sum">TΣ</button>
+      </div>
+    </section>
+
+    <section class="card side" aria-label="Activity">
+      <div class="side-head">
+        <div class="label">Activity</div>
+        <button class="btn-ghost" id="reset">Reset</button>
+      </div>
+      <ul class="feed" id="feed"></ul>
+      <div class="feed-empty" id="feed-empty">Nothing yet. Ask Claude to use the calculator.</div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   BEHAVIOUR — the UI API. The live version will call exactly
+   these two functions from server events:
+     ui.state({ mem, tape, display, expr }, source)
+     ui.activity({ source, tool, args, result, error })
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const ui = {
+  last: { mem: 0, tape: [] },
+  state(s, source) {
+    if (s.display !== undefined) { $("display").textContent = s.display; $("display").classList.remove("bump"); void $("display").offsetWidth; $("display").classList.add("bump"); }
+    if (s.expr !== undefined) $("expr").textContent = s.expr;
+    if (s.mem !== undefined && s.mem !== this.last.mem) { $("mem").textContent = s.mem; bump($("mem")); flash($("mem-box"), source); }
+    if (s.tape !== undefined) {
+      const t = $("tape"), prev = this.last.tape;
+      if (s.tape.length < prev.length || s.tape.some((v, i) => v !== prev[i] && i < prev.length)) t.innerHTML = "";
+      if (!s.tape.length) t.innerHTML = '<span class="empty">empty</span>';
+      else {
+        t.querySelector(".empty")?.remove(); t.querySelector(".tape-sum")?.remove();
+        for (let i = t.querySelectorAll(".chip").length; i < s.tape.length; i++) {
+          const c = document.createElement("span"); c.className = "chip"; c.textContent = s.tape[i]; t.appendChild(c);
+        }
+        const sum = document.createElement("span"); sum.className = "tape-sum"; sum.textContent = "Σ " + s.tape.reduce((a, b) => a + b, 0); t.appendChild(sum);
+      }
+      if (s.tape.length !== prev.length) flash($("tape-box"), source);
+      this.last.tape = [...s.tape];
+    }
+    if (s.mem !== undefined) this.last.mem = s.mem;
+  },
+  activity(e) {
+    $("feed-empty").style.display = "none";
+    const li = document.createElement("li");
+    li.className = (e.source === "claude" ? "claude" : "you") + (e.error ? " err" : "");
+    const args = Object.entries(e.args || {}).map(([k, v]) => `${k}=${v}`).join(", ");
+    li.innerHTML = `<span class="who">${e.source === "claude" ? "🤖 Claude" : "👆 You"}</span>
+      <span class="call"></span><span class="time" data-t="${Date.now()}">now</span>
+      <span class="res">→ <b></b></span>`;
+    li.querySelector(".call").textContent = `${e.tool}(${args})`;
+    li.querySelector(".res b").textContent = e.error ? "error: " + e.error : (e.result === undefined ? "ok" : JSON.stringify(e.result));
+    $("feed").prepend(li);
+  },
+  connection(on) { $("status").classList.toggle("off", !on); $("status-text").textContent = on ? "live" : "reconnecting…"; },
+  clearFeed() { $("feed").innerHTML = ""; $("feed-empty").style.display = ""; },
+};
+function bump(el) { el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+function flash(el, source) {
+  const cls = source === "claude" ? "flash-claude" : "flash-you";
+  el.classList.add(cls); clearTimeout(el._f); el._f = setTimeout(() => el.classList.remove(cls), 1100);
+}
+setInterval(() => {
+  for (const t of document.querySelectorAll(".feed .time")) {
+    const s = Math.round((Date.now() - +t.dataset.t) / 1000);
+    t.textContent = s < 2 ? "now" : s < 60 ? s + "s" : Math.floor(s / 60) + "m";
+  }
+}, 1000);
+
+/* ============================================================
+   CONNECTION — the page never computes anything itself. Buttons
+   call the server (same tool handlers Claude uses); everything that
+   happens — from Claude or from here — comes back over /events.
+   ============================================================ */
+async function callTool(tool, args) {
+  const r = await fetch("/api/tools/" + tool, {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(args),
+  });
+  const body = await r.json().catch(() => ({ error: "bad response" }));
+  if (!r.ok) throw new Error(body.error || "HTTP " + r.status);
+  return body.result;
+}
+const fmtCall = (tool, args) => `${tool}(${Object.values(args || {}).join(", ")})`;
+const shown = new Set();
+function showActivity(a, state) {
+  if (shown.has(a.id)) return; shown.add(a.id);
+  ui.activity({ ...a, source: a.source === "claude" ? "claude" : "you" });
+  if (state) ui.state(state, a.source === "claude" ? "claude" : "you");
+  // Claude's results land on the display, so the audience sees the answer appear.
+  if (a.source === "claude" && !a.error && a.result !== undefined && a.result !== null) {
+    ui.state({ display: Array.isArray(a.result) ? "[" + a.result.join(", ") + "]" : String(a.result), expr: fmtCall(a.tool, a.args) }, "claude");
+  }
+}
+async function loadState() {
+  const { state, history } = await (await fetch("/api/state")).json();
+  ui.clearFeed(); shown.clear();
+  ui.last = { mem: null, tape: [] }; $("tape").innerHTML = "";   // full redraw from the server's truth
+  for (const a of history) { shown.add(a.id); ui.activity({ ...a, source: a.source === "claude" ? "claude" : "you" }); }
+  ui.state(state, "you");
+}
+function connect() {
+  const es = new EventSource("/events");
+  es.onopen = () => { ui.connection(true); loadState().catch(() => {}); };
+  es.onerror = () => ui.connection(false);   // EventSource retries by itself
+  es.addEventListener("activity", (m) => { const d = JSON.parse(m.data); showActivity(d.activity, d.state); });
+  es.addEventListener("reset", (m) => {
+    const d = JSON.parse(m.data); ui.clearFeed(); shown.clear(); ui.state(d.state, "you");
+    entry = "0"; acc = null; pending = null; fresh = true; show(0);
+  });
+}
+
+/* ============================================================
+   KEYPAD — a normal calculator; every operation goes through
+   callTool, so page presses and Claude's calls are the same path.
+   ============================================================ */
+let entry = "0", acc = null, pending = null, fresh = true;
+const show = (v, expr = "") => ui.state({ display: String(v), expr });
+const num = () => Number(entry);
+$("keys").addEventListener("click", async (ev) => {
+  const b = ev.target.closest("button"); if (!b) return;
+  const k = b.dataset.k, op = b.dataset.op, t = b.dataset.t;
+  try {
+    if (k && /[0-9.]/.test(k)) {
+      if (fresh) { entry = k === "." ? "0." : k; fresh = false; }
+      else if (!(k === "." && entry.includes("."))) entry = entry === "0" && k !== "." ? k : entry + k;
+      return show(entry, pending ? `${acc} ${symbol(pending)}` : "");
+    }
+    if (k === "±") { entry = String(-num()); return show(entry); }
+    if (k === "C") { entry = "0"; acc = null; pending = null; fresh = true; return show(0); }
+    if (op) {
+      if (pending && !fresh) acc = await callTool(pending, { a: acc, b: num() });
+      else if (acc === null || !pending) acc = num();
+      pending = op; fresh = true; return show(acc, `${acc} ${symbol(op)}`);
+    }
+    if (k === "=") {
+      if (!pending) return;
+      const a = acc, bb = num(), r = await callTool(pending, { a, b: bb });
+      show(r, `${pending === "ny0tadd" ? `ny0tadd(${a}, ${bb})` : `${a} ${symbol(pending)} ${bb}`} =`);
+      entry = String(r); acc = null; pending = null; fresh = true; return;
+    }
+    if (t === "mem_add") { await callTool("mem_add", { n: num() }); fresh = true; return; }
+    if (t === "mem_read") { const r = await callTool("mem_read", {}); entry = String(r); fresh = true; return show(r, "MR"); }
+    if (t === "mem_clear") { await callTool("mem_clear", {}); return; }
+    if (t === "tape_push") { await callTool("tape_push", { value: num() }); fresh = true; return; }
+    if (t === "tape_sum") { const r = await callTool("tape_sum", {}); entry = String(r); fresh = true; return show(r, "tape Σ"); }
+  } catch (e) { show("Error", e.message); entry = "0"; acc = null; pending = null; fresh = true; }
+});
+function symbol(op) { return { add: "+", subtract: "−", multiply: "×", divide: "÷", ny0tadd: "ny0t+" }[op]; }
+
+/* ============================================================
+   DEMO CONTROLS
+   ============================================================ */
+$("reset").addEventListener("click", () => {
+  fetch("/api/reset", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+});
+
+ui.state({ mem: 0, tape: [] }, "you");
+ui.connection(false);
+connect();
+</script>
+</body>
+</html>

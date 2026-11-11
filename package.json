@@ -1,0 +1,20 @@
+{
+  "name": "calcbench",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Internal testbed: benchmark how an AI agent invokes app logic over MCP. Not a product.",
+  "scripts": {
+    "test": "node --test src/calc-core/*.test.ts src/demo/*.test.ts bench/*.test.ts",
+    "gen:schema": "node scripts/gen-schema.ts",
+    "bench": "node bench/run.ts all && node bench/table.ts",
+    "bench:ceiling": "node --env-file-if-exists=.env bench/run.ts ceiling && node bench/table.ts",
+    "table": "node bench/table.ts",
+    "demo": "node src/demo/server.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "zod": "^4.6.7"
+  }
+}

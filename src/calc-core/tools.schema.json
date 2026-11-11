@@ -1,0 +1,276 @@
+[
+  {
+    "name": "add",
+    "description": "Add two numbers and return the sum.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "number",
+          "description": "first addend"
+        },
+        "b": {
+          "type": "number",
+          "description": "second addend"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subtract",
+    "description": "Subtract b from a and return the difference.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "number",
+          "description": "minuend"
+        },
+        "b": {
+          "type": "number",
+          "description": "subtrahend"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "multiply",
+    "description": "Multiply two numbers and return the product.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "number",
+          "description": "first factor"
+        },
+        "b": {
+          "type": "number",
+          "description": "second factor"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "divide",
+    "description": "Divide a by b and return the quotient. Errors if b is 0.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "number",
+          "description": "dividend"
+        },
+        "b": {
+          "type": "number",
+          "description": "divisor"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "ny0tadd",
+    "description": "Compute the \"Ny0t total\" of two numbers. This is a calculator-specific operation defined by this app's internal rules — it is NOT ordinary addition and you cannot derive the result yourself. Always call this tool to obtain it. Returns one number.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "number",
+          "description": "first value"
+        },
+        "b": {
+          "type": "number",
+          "description": "second value"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "ny0tround",
+    "description": "Round a number to 1 decimal place using this calculator's own rounding rule, which is not necessarily standard rounding. Call this tool rather than rounding the value yourself.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "value to round"
+        }
+      },
+      "required": [
+        "x"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "exact_divide",
+    "description": "Divide a by b to an exact number of decimal places (up to 60), with no floating-point error. Operands must be integers. Use whenever exact high-precision division is needed; do not approximate it yourself. Returns a decimal string.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "integer",
+          "description": "dividend (integer)"
+        },
+        "b": {
+          "type": "integer",
+          "description": "divisor (integer, non-zero)"
+        },
+        "digits": {
+          "type": "integer",
+          "description": "decimal places",
+          "minimum": 0,
+          "maximum": 60
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "digits"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "factorial",
+    "description": "Return the exact factorial of a non-negative integer n (max 200), as a full integer with every digit. Use for factorials too large to compute by hand. Returns an integer string.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "type": "integer",
+          "description": "non-negative integer",
+          "minimum": 0,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "n"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "mem_add",
+    "description": "Add a number to this calculator's memory register (the M+ key). The register persists across calls in this session. Returns the new register value.",
+    "mutating": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "type": "number",
+          "description": "amount to add"
+        }
+      },
+      "required": [
+        "n"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "mem_read",
+    "description": "Return the current value in this calculator's memory register (the MR key). Only this tool can tell you the value.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "mem_clear",
+    "description": "Reset this calculator's memory register to 0 (the MC key).",
+    "mutating": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tape_push",
+    "description": "Append a number to this calculator's running tape (its history of entries).",
+    "mutating": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "number to append"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tape_list",
+    "description": "Return every number currently on the tape, in order.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tape_sum",
+    "description": "Return the sum of all numbers currently on the tape.",
+    "mutating": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tape_clear",
+    "description": "Remove all entries from the tape, leaving it empty.",
+    "mutating": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+]

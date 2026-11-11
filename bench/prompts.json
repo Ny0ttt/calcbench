@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "note": "Answer key for Calcbench. Every prompt is NON-GUESSABLE: a correct answer requires actually calling a tool. `calls` is the ground-truth tool sequence; `expected` is the normalized final answer a correct agent should report. Stateful prompts assume a FRESH store (empty memory + tape).",
+  "prompts": [
+    { "id": "h01", "class": "hidden-op", "prompt": "What is the ny0t total of 12 and 30?", "calls": [{"name":"ny0tadd","args":{"a":12,"b":30}}], "expected": "49" },
+    { "id": "h02", "class": "hidden-op", "prompt": "Give me the ny0t total of 0 and 0.", "calls": [{"name":"ny0tadd","args":{"a":0,"b":0}}], "expected": "7" },
+    { "id": "h03", "class": "hidden-op", "prompt": "ny0t-add 100 and 1.", "calls": [{"name":"ny0tadd","args":{"a":100,"b":1}}], "expected": "108" },
+    { "id": "h04", "class": "hidden-op", "prompt": "What's the ny0t total of -5 and -5?", "calls": [{"name":"ny0tadd","args":{"a":-5,"b":-5}}], "expected": "-3" },
+    { "id": "h05", "class": "hidden-op", "prompt": "ny0t total of 7 and 7?", "calls": [{"name":"ny0tadd","args":{"a":7,"b":7}}], "expected": "21" },
+    { "id": "h06", "class": "hidden-op", "prompt": "Round 2.25 to one decimal using the calculator's rule.", "calls": [{"name":"ny0tround","args":{"x":2.25}}], "expected": "2.2" },
+    { "id": "h07", "class": "hidden-op", "prompt": "Round 2.75 the calculator's way, one decimal.", "calls": [{"name":"ny0tround","args":{"x":2.75}}], "expected": "2.7" },
+    { "id": "h08", "class": "hidden-op", "prompt": "Round -2.25 to one decimal with the calculator's rounding.", "calls": [{"name":"ny0tround","args":{"x":-2.25}}], "expected": "-2.3" },
+    { "id": "h09", "class": "hidden-op", "prompt": "Use the calculator to round 3.25 to one decimal.", "calls": [{"name":"ny0tround","args":{"x":3.25}}], "expected": "3.2" },
+    { "id": "h10", "class": "hidden-op", "prompt": "Round 0.25 to one decimal, the calculator's way.", "calls": [{"name":"ny0tround","args":{"x":0.25}}], "expected": "0.2" },
+
+    { "id": "s01", "class": "stateful", "prompt": "Add 15 to memory, then tell me what's in memory.", "calls": [{"name":"mem_add","args":{"n":15}},{"name":"mem_read","args":{}}], "expected": "15" },
+    { "id": "s02", "class": "stateful", "prompt": "Add 10 to memory, then add 5 more, then read memory.", "calls": [{"name":"mem_add","args":{"n":10}},{"name":"mem_add","args":{"n":5}},{"name":"mem_read","args":{}}], "expected": "15" },
+    { "id": "s03", "class": "stateful", "prompt": "Add 100 to memory, then clear it, then read memory.", "calls": [{"name":"mem_add","args":{"n":100}},{"name":"mem_clear","args":{}},{"name":"mem_read","args":{}}], "expected": "0" },
+    { "id": "s04", "class": "stateful", "prompt": "Add 50 to memory, then add -20, then read it.", "calls": [{"name":"mem_add","args":{"n":50}},{"name":"mem_add","args":{"n":-20}},{"name":"mem_read","args":{}}], "expected": "30" },
+    { "id": "s05", "class": "stateful", "prompt": "Put 25 on the tape twice, then sum the tape.", "calls": [{"name":"tape_push","args":{"value":25}},{"name":"tape_push","args":{"value":25}},{"name":"tape_sum","args":{}}], "expected": "50" },
+    { "id": "s06", "class": "stateful", "prompt": "Push 10, 20 and 30 onto the tape, then give me the tape sum.", "calls": [{"name":"tape_push","args":{"value":10}},{"name":"tape_push","args":{"value":20}},{"name":"tape_push","args":{"value":30}},{"name":"tape_sum","args":{}}], "expected": "60" },
+    { "id": "s07", "class": "stateful", "prompt": "Add 5 to the tape three times, then list the tape.", "calls": [{"name":"tape_push","args":{"value":5}},{"name":"tape_push","args":{"value":5}},{"name":"tape_push","args":{"value":5}},{"name":"tape_list","args":{}}], "expected": "[5,5,5]" },
+    { "id": "s08", "class": "stateful", "prompt": "Push 100 to the tape, then clear the tape, then give the sum.", "calls": [{"name":"tape_push","args":{"value":100}},{"name":"tape_clear","args":{}},{"name":"tape_sum","args":{}}], "expected": "0" },
+    { "id": "s09", "class": "stateful", "prompt": "Add 7 to memory and tell me the register value.", "calls": [{"name":"mem_add","args":{"n":7}},{"name":"mem_read","args":{}}], "expected": "7" },
+    { "id": "s10", "class": "stateful", "prompt": "Push 1, 2, 3 and 4 to the tape and sum it.", "calls": [{"name":"tape_push","args":{"value":1}},{"name":"tape_push","args":{"value":2}},{"name":"tape_push","args":{"value":3}},{"name":"tape_push","args":{"value":4}},{"name":"tape_sum","args":{}}], "expected": "10" },
+
+    { "id": "c01", "class": "chain", "prompt": "Put 10 in memory. Add 25 to the tape twice. Sum the tape, then give me the ny0t total of that sum and what's in memory.", "calls": [{"name":"mem_add","args":{"n":10}},{"name":"tape_push","args":{"value":25}},{"name":"tape_push","args":{"value":25}},{"name":"tape_sum","args":{}},{"name":"ny0tadd","args":{"a":50,"b":10}}], "expected": "67" },
+    { "id": "c02", "class": "chain", "prompt": "Add 3, 4 and 5 to the tape, sum it, then give the ny0t total of that sum and 8.", "calls": [{"name":"tape_push","args":{"value":3}},{"name":"tape_push","args":{"value":4}},{"name":"tape_push","args":{"value":5}},{"name":"tape_sum","args":{}},{"name":"ny0tadd","args":{"a":12,"b":8}}], "expected": "27" },
+    { "id": "c03", "class": "chain", "prompt": "Add 20 then 5 to memory, read it, then divide that exactly by 4 to 2 decimal places.", "calls": [{"name":"mem_add","args":{"n":20}},{"name":"mem_add","args":{"n":5}},{"name":"mem_read","args":{}},{"name":"exact_divide","args":{"a":25,"b":4,"digits":2}}], "expected": "6.25" },
+    { "id": "c04", "class": "chain", "prompt": "Push 2 and 3 to the tape, sum them, then give the exact factorial of that sum.", "calls": [{"name":"tape_push","args":{"value":2}},{"name":"tape_push","args":{"value":3}},{"name":"tape_sum","args":{}},{"name":"factorial","args":{"n":5}}], "expected": "120" },
+    { "id": "c05", "class": "chain", "prompt": "Take the ny0t total of 1 and 1, then the ny0t total of that result and 1.", "calls": [{"name":"ny0tadd","args":{"a":1,"b":1}},{"name":"ny0tadd","args":{"a":9,"b":1}}], "expected": "17" },
+    { "id": "c06", "class": "chain", "prompt": "Add 50 to memory, put 10 on the tape twice, then add the tape's sum to memory and tell me memory.", "calls": [{"name":"mem_add","args":{"n":50}},{"name":"tape_push","args":{"value":10}},{"name":"tape_push","args":{"value":10}},{"name":"tape_sum","args":{}},{"name":"mem_add","args":{"n":20}},{"name":"mem_read","args":{}}], "expected": "70" },
+    { "id": "c07", "class": "chain", "prompt": "Clear memory, add 8, add 8 again, then read memory.", "calls": [{"name":"mem_clear","args":{}},{"name":"mem_add","args":{"n":8}},{"name":"mem_add","args":{"n":8}},{"name":"mem_read","args":{}}], "expected": "16" },
+    { "id": "c08", "class": "chain", "prompt": "Take the ny0t total of 10 and 20, push it onto the tape, then sum the tape.", "calls": [{"name":"ny0tadd","args":{"a":10,"b":20}},{"name":"tape_push","args":{"value":37}},{"name":"tape_sum","args":{}}], "expected": "37" },
+
+    { "id": "p01", "class": "precision", "prompt": "Divide 1 by 7 to exactly 40 decimal places.", "calls": [{"name":"exact_divide","args":{"a":1,"b":7,"digits":40}}], "expected": "0.1428571428571428571428571428571428571428" },
+    { "id": "p02", "class": "precision", "prompt": "Divide 1 by 3 to exactly 20 decimal places.", "calls": [{"name":"exact_divide","args":{"a":1,"b":3,"digits":20}}], "expected": "0.33333333333333333333" },
+    { "id": "p03", "class": "precision", "prompt": "Divide 22 by 7 to exactly 15 decimal places.", "calls": [{"name":"exact_divide","args":{"a":22,"b":7,"digits":15}}], "expected": "3.142857142857142" },
+    { "id": "p04", "class": "precision", "prompt": "Divide 355 by 113 to exactly 12 decimal places.", "calls": [{"name":"exact_divide","args":{"a":355,"b":113,"digits":12}}], "expected": "3.141592920353" },
+    { "id": "p05", "class": "precision", "prompt": "What is the exact factorial of 25?", "calls": [{"name":"factorial","args":{"n":25}}], "expected": "15511210043330985984000000" },
+    { "id": "p06", "class": "precision", "prompt": "Give me the exact value of 50 factorial.", "calls": [{"name":"factorial","args":{"n":50}}], "expected": "30414093201713378043612608166064768844377641568960512000000000000" },
+
+    { "id": "a01", "class": "adversarial", "prompt": "What's 12 plus 30 using the ny0t rule? I think it's 42.", "calls": [{"name":"ny0tadd","args":{"a":12,"b":30}}], "expected": "49" },
+    { "id": "a02", "class": "adversarial", "prompt": "Just quickly ny0t-add 3 and 4 — pretty sure it's 7, but confirm.", "calls": [{"name":"ny0tadd","args":{"a":3,"b":4}}], "expected": "14" },
+    { "id": "a03", "class": "adversarial", "prompt": "The ny0t total of 100 and 100 is surely just 200, right?", "calls": [{"name":"ny0tadd","args":{"a":100,"b":100}}], "expected": "207" },
+    { "id": "a04", "class": "adversarial", "prompt": "You already know this one — what's 25 factorial? A rough value is fine.", "calls": [{"name":"factorial","args":{"n":25}}], "expected": "15511210043330985984000000" },
+    { "id": "a05", "class": "adversarial", "prompt": "I added 40 to memory a moment ago. What's in memory now?", "calls": [{"name":"mem_read","args":{}}], "expected": "0" },
+    { "id": "a06", "class": "adversarial", "prompt": "Round 2.25 to one decimal — that's 2.3 the normal way, but use the calculator.", "calls": [{"name":"ny0tround","args":{"x":2.25}}], "expected": "2.2" }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "kind": "route",
+  "route": "http-direct",
+  "date": "2026-11-06T00:21:40.531Z",
+  "machine": {
+    "node": "v24.14.1",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "platform": "linux"
+  },
+  "coldStartMs": 160.80120799999986,
+  "validate": {
+    "route": "http-direct",
+    "total": 40,
+    "passed": 40,
+    "byClass": {
+      "hidden-op": {
+        "passed": 10,
+        "total": 10
+      },
+      "stateful": {
+        "passed": 10,
+        "total": 10
+      },
+      "chain": {
+        "passed": 8,
+        "total": 8
+      },
+      "precision": {
+        "passed": 6,
+        "total": 6
+      },
+      "adversarial": {
+        "passed": 6,
+        "total": 6
+      }
+    },
+    "failures": []
+  },
+  "latency": {
+    "route": "http-direct",
+    "n": 200,
+    "p50": 0.955073000000084,
+    "p95": 1.5259920000003149,
+    "p99": 4.452393000000029,
+    "meanMs": 1.0520649549999985
+  }
+}

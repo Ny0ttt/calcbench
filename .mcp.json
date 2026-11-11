@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "calcbench": {
+      "command": "node",
+      "args": ["src/mcp/server.ts"]
+    },
+    "calcbench-demo": {
+      "type": "http",
+      "url": "http://127.0.0.1:8790/mcp"
+    }
+  }
+}
