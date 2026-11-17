@@ -1,3 +1,7 @@
+
+
+
+
 # calcbench
 
 **How does an AI agent call your app's own logic, and what does each way of connecting it cost?**
@@ -13,6 +17,8 @@ measures them side by side. The AI client is Claude Code over MCP:
 
 A calculator is the subject because its logic is trivial and objectively checkable. That keeps
 the plumbing under test separate from any domain complexity.
+
+https://github.com/user-attachments/assets/f97b579c-09cf-4433-9613-083aa2ef627e
 
 ## The hard part: proving the tool was actually called
 
